@@ -61,6 +61,10 @@ export const makeManagedServerProvider = Effect.fn("makeManagedServerProvider")(
     ),
   ).pipe(Effect.forkScoped);
 
+  // Eagerly run the first provider check so dynamic data (e.g. models)
+  // is available before the first periodic refresh.
+  yield* refreshSnapshot().pipe(Effect.ignoreCause({ log: true }), Effect.forkScoped);
+
   return {
     getSnapshot: input.getSettings.pipe(
       Effect.flatMap(applySnapshot),

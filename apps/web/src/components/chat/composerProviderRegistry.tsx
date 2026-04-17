@@ -1,4 +1,6 @@
 import {
+  type ClaudeModelOptions,
+  type CodexModelOptions,
   type ProviderKind,
   type ProviderModelOptions,
   type ScopedThreadRef,
@@ -81,8 +83,16 @@ function getProviderStateFromCapabilities(
   // Normalize options for dispatch
   const normalizedOptions =
     provider === "codex"
-      ? normalizeCodexModelOptionsWithCapabilities(caps, providerOptions)
-      : normalizeClaudeModelOptionsWithCapabilities(caps, providerOptions);
+      ? normalizeCodexModelOptionsWithCapabilities(
+          caps,
+          providerOptions as CodexModelOptions | undefined,
+        )
+      : provider === "claudeAgent"
+        ? normalizeClaudeModelOptionsWithCapabilities(
+            caps,
+            providerOptions as ClaudeModelOptions | undefined,
+          )
+        : (providerOptions ?? undefined);
 
   // Ultrathink styling (driven by capabilities data, not provider identity)
   const ultrathinkActive =
@@ -181,6 +191,51 @@ const composerProviderRegistry: Record<ProviderKind, ProviderRegistryEntry> = {
       !hasComposerTraitsTarget({ threadRef, draftId }) ? null : (
         <TraitsPicker
           provider="claudeAgent"
+          models={models}
+          {...(threadRef ? { threadRef } : {})}
+          {...(draftId ? { draftId } : {})}
+          model={model}
+          modelOptions={modelOptions}
+          prompt={prompt}
+          onPromptChange={onPromptChange}
+        />
+      ),
+  },
+  kiro: {
+    getState: (input) => getProviderStateFromCapabilities(input),
+    renderTraitsMenuContent: ({
+      threadRef,
+      draftId,
+      model,
+      models,
+      modelOptions,
+      prompt,
+      onPromptChange,
+    }) =>
+      !hasComposerTraitsTarget({ threadRef, draftId }) ? null : (
+        <TraitsMenuContent
+          provider="kiro"
+          models={models}
+          {...(threadRef ? { threadRef } : {})}
+          {...(draftId ? { draftId } : {})}
+          model={model}
+          modelOptions={modelOptions}
+          prompt={prompt}
+          onPromptChange={onPromptChange}
+        />
+      ),
+    renderTraitsPicker: ({
+      threadRef,
+      draftId,
+      model,
+      models,
+      modelOptions,
+      prompt,
+      onPromptChange,
+    }) =>
+      !hasComposerTraitsTarget({ threadRef, draftId }) ? null : (
+        <TraitsPicker
+          provider="kiro"
           models={models}
           {...(threadRef ? { threadRef } : {})}
           {...(draftId ? { draftId } : {})}

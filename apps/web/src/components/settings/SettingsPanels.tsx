@@ -13,6 +13,7 @@ import { type ReactNode, useCallback, useMemo, useRef, useState } from "react";
 import {
   PROVIDER_DISPLAY_NAMES,
   type DesktopUpdateChannel,
+  type ModelSelection,
   type ScopedThreadRef,
   type ProviderKind,
   type ServerProvider,
@@ -124,6 +125,12 @@ const PROVIDER_SETTINGS: readonly InstallProviderSettings[] = [
     title: "Claude",
     binaryPlaceholder: "Claude binary path",
     binaryDescription: "Path to the Claude binary",
+  },
+  {
+    provider: "kiro",
+    title: "Kiro",
+    binaryPlaceholder: "Kiro CLI binary path",
+    binaryDescription: "Path to the kiro-cli binary",
   },
 ] as const;
 
@@ -514,12 +521,17 @@ export function GeneralSettingsPanel() {
       settings.providers.claudeAgent.customModels.length > 0 ||
       settings.providers.claudeAgent.launchArgs !== "",
     ),
+    kiro: Boolean(
+      settings.providers.kiro.binaryPath !== DEFAULT_UNIFIED_SETTINGS.providers.kiro.binaryPath ||
+      settings.providers.kiro.customModels.length > 0,
+    ),
   });
   const [customModelInputByProvider, setCustomModelInputByProvider] = useState<
     Record<ProviderKind, string>
   >({
     codex: "",
     claudeAgent: "",
+    kiro: "",
   });
   const [customModelErrorByProvider, setCustomModelErrorByProvider] = useState<
     Partial<Record<ProviderKind, string | null>>
@@ -1064,7 +1076,7 @@ export function GeneralSettingsPanel() {
                           provider: textGenProvider,
                           model: textGenModel,
                           ...(nextOptions ? { options: nextOptions } : {}),
-                        },
+                        } as ModelSelection,
                       },
                       serverProviders,
                     ),
@@ -1422,7 +1434,9 @@ export function GeneralSettingsPanel() {
                           placeholder={
                             providerCard.provider === "codex"
                               ? "gpt-6.7-codex-ultra-preview"
-                              : "claude-sonnet-5-0"
+                              : providerCard.provider === "claudeAgent"
+                                ? "claude-sonnet-5-0"
+                                : "kiro-custom-model"
                           }
                           spellCheck={false}
                         />

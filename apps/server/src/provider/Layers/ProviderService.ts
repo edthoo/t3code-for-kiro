@@ -10,6 +10,7 @@
  * @module ProviderServiceLive
  */
 import {
+  DEFAULT_PROVIDER_KIND,
   ModelSelection,
   NonNegativeInt,
   ThreadId,
@@ -342,7 +343,7 @@ const makeProviderService = Effect.fn("makeProviderService")(function* (
       const input = {
         ...parsed,
         threadId,
-        provider: parsed.provider ?? "codex",
+        provider: parsed.provider ?? DEFAULT_PROVIDER_KIND,
       };
       yield* Effect.annotateCurrentSpan({
         "provider.operation": "start-session",

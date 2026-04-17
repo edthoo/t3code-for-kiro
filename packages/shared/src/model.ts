@@ -1,5 +1,6 @@
 import {
   DEFAULT_MODEL_BY_PROVIDER,
+  DEFAULT_PROVIDER_KIND,
   MODEL_SLUG_ALIASES_BY_PROVIDER,
   type ClaudeAgentEffort,
   type ClaudeModelOptions,
@@ -123,7 +124,7 @@ export function isClaudeUltrathinkPrompt(text: string | null | undefined): boole
 
 export function normalizeModelSlug(
   model: string | null | undefined,
-  provider: ProviderKind = "codex",
+  provider: ProviderKind = DEFAULT_PROVIDER_KIND,
 ): string | null {
   if (typeof model !== "string") {
     return null;

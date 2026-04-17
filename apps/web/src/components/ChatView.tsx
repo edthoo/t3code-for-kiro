@@ -1,6 +1,7 @@
 import {
   type ApprovalRequestId,
   DEFAULT_MODEL_BY_PROVIDER,
+  DEFAULT_PROVIDER_KIND,
   type ClaudeAgentEffort,
   type EnvironmentId,
   type MessageId,
@@ -771,8 +772,8 @@ export default function ChatView(props: ChatViewProps) {
             threadId,
             draftThread,
             fallbackDraftProject?.defaultModelSelection ?? {
-              provider: "codex",
-              model: DEFAULT_MODEL_BY_PROVIDER.codex,
+              provider: DEFAULT_PROVIDER_KIND,
+              model: DEFAULT_MODEL_BY_PROVIDER[DEFAULT_PROVIDER_KIND],
             },
             localDraftError,
           )
@@ -1045,7 +1046,7 @@ export default function ChatView(props: ChatViewProps) {
   const providerStatuses = serverConfig?.providers ?? EMPTY_PROVIDERS;
   const unlockedSelectedProvider = resolveSelectableProvider(
     providerStatuses,
-    selectedProviderByThreadId ?? threadProvider ?? "codex",
+    selectedProviderByThreadId ?? threadProvider ?? DEFAULT_PROVIDER_KIND,
   );
   const selectedProvider: ProviderKind = lockedProvider ?? unlockedSelectedProvider;
   const phase = derivePhase(activeThread?.session ?? null);
@@ -2539,7 +2540,7 @@ export default function ChatView(props: ChatViewProps) {
         ...(ctxSelectedModelSelection.options
           ? { options: ctxSelectedModelSelection.options }
           : {}),
-      };
+      } as ModelSelection;
 
       // Auto-title from first message
       if (isFirstMessage && isServerThread) {

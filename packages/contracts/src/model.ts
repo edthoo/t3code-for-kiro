@@ -13,7 +13,9 @@ export const ClaudeAgentEffort = Schema.Literals([
   "ultrathink",
 ]);
 export type ClaudeAgentEffort = typeof ClaudeAgentEffort.Type;
-export type ProviderReasoningEffort = CodexReasoningEffort | ClaudeAgentEffort;
+export const KiroEffort = Schema.Literals(["low", "medium", "high"]);
+export type KiroEffort = typeof KiroEffort.Type;
+export type ProviderReasoningEffort = CodexReasoningEffort | ClaudeAgentEffort | KiroEffort;
 
 export const CodexModelOptions = Schema.Struct({
   reasoningEffort: Schema.optional(CodexReasoningEffort),
@@ -29,9 +31,15 @@ export const ClaudeModelOptions = Schema.Struct({
 });
 export type ClaudeModelOptions = typeof ClaudeModelOptions.Type;
 
+export const KiroModelOptions = Schema.Struct({
+  effort: Schema.optional(KiroEffort),
+});
+export type KiroModelOptions = typeof KiroModelOptions.Type;
+
 export const ProviderModelOptions = Schema.Struct({
   codex: Schema.optional(CodexModelOptions),
   claudeAgent: Schema.optional(ClaudeModelOptions),
+  kiro: Schema.optional(KiroModelOptions),
 });
 export type ProviderModelOptions = typeof ProviderModelOptions.Type;
 
@@ -61,14 +69,16 @@ export type ModelCapabilities = typeof ModelCapabilities.Type;
 export const DEFAULT_MODEL_BY_PROVIDER: Record<ProviderKind, string> = {
   codex: "gpt-5.4",
   claudeAgent: "claude-sonnet-4-6",
+  kiro: "auto",
 };
 
-export const DEFAULT_MODEL = DEFAULT_MODEL_BY_PROVIDER.codex;
+export const DEFAULT_MODEL = DEFAULT_MODEL_BY_PROVIDER.kiro;
 
 /** Per-provider text generation model defaults. */
 export const DEFAULT_GIT_TEXT_GENERATION_MODEL_BY_PROVIDER: Record<ProviderKind, string> = {
   codex: "gpt-5.4-mini",
   claudeAgent: "claude-haiku-4-5",
+  kiro: "auto",
 };
 
 export const MODEL_SLUG_ALIASES_BY_PROVIDER: Record<ProviderKind, Record<string, string>> = {
@@ -96,6 +106,7 @@ export const MODEL_SLUG_ALIASES_BY_PROVIDER: Record<ProviderKind, Record<string,
     "claude-haiku-4.5": "claude-haiku-4-5",
     "claude-haiku-4-5-20251001": "claude-haiku-4-5",
   },
+  kiro: {},
 };
 
 // ── Provider display names ────────────────────────────────────────────
@@ -103,4 +114,5 @@ export const MODEL_SLUG_ALIASES_BY_PROVIDER: Record<ProviderKind, Record<string,
 export const PROVIDER_DISPLAY_NAMES: Record<ProviderKind, string> = {
   codex: "Codex",
   claudeAgent: "Claude",
+  kiro: "Kiro",
 };

@@ -13,6 +13,7 @@ import type {
   TurnId,
 } from "@t3tools/contracts";
 import {
+  DEFAULT_PROVIDER_KIND,
   PROVIDER_SEND_TURN_MAX_ATTACHMENTS,
   PROVIDER_SEND_TURN_MAX_IMAGE_BYTES,
 } from "@t3tools/contracts";
@@ -555,7 +556,7 @@ export const ChatComposer = memo(
 
     const unlockedSelectedProvider = resolveSelectableProvider(
       providerStatuses,
-      selectedProviderByThreadId ?? threadProvider ?? "codex",
+      selectedProviderByThreadId ?? threadProvider ?? DEFAULT_PROVIDER_KIND,
     );
     const selectedProvider: ProviderKind = lockedProvider ?? unlockedSelectedProvider;
 
@@ -589,11 +590,12 @@ export const ChatComposer = memo(
     const selectedPromptEffort = composerProviderState.promptEffort;
     const selectedModelOptionsForDispatch = composerProviderState.modelOptionsForDispatch;
     const selectedModelSelection = useMemo<ModelSelection>(
-      () => ({
-        provider: selectedProvider,
-        model: selectedModel,
-        ...(selectedModelOptionsForDispatch ? { options: selectedModelOptionsForDispatch } : {}),
-      }),
+      () =>
+        ({
+          provider: selectedProvider,
+          model: selectedModel,
+          ...(selectedModelOptionsForDispatch ? { options: selectedModelOptionsForDispatch } : {}),
+        }) as ModelSelection,
       [selectedModel, selectedModelOptionsForDispatch, selectedProvider],
     );
     const selectedModelForPicker = selectedModel;
@@ -604,6 +606,7 @@ export const ChatComposer = memo(
         codex: providerStatuses.find((provider) => provider.provider === "codex")?.models ?? [],
         claudeAgent:
           providerStatuses.find((provider) => provider.provider === "claudeAgent")?.models ?? [],
+        kiro: providerStatuses.find((provider) => provider.provider === "kiro")?.models ?? [],
       }),
       [providerStatuses],
     );

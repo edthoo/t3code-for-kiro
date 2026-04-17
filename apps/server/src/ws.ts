@@ -984,7 +984,7 @@ const makeWsRpcLayer = (currentSessionId: AuthSessionId) =>
               );
 
               yield* Effect.all(
-                [providerRegistry.refresh("codex"), providerRegistry.refresh("claudeAgent")],
+                [providerRegistry.refresh("codex"), providerRegistry.refresh("claudeAgent"), providerRegistry.refresh("kiro")],
                 {
                   concurrency: "unbounded",
                   discard: true,

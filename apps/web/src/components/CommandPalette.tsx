@@ -3,6 +3,7 @@
 import { scopeProjectRef, scopeThreadRef } from "@t3tools/client-runtime";
 import {
   DEFAULT_MODEL_BY_PROVIDER,
+  DEFAULT_PROVIDER_KIND,
   type EnvironmentId,
   type FilesystemBrowseResult,
   type ProjectId,
@@ -777,8 +778,8 @@ function OpenCommandPaletteDialog() {
           workspaceRoot: cwd,
           createWorkspaceRootIfMissing: true,
           defaultModelSelection: {
-            provider: "codex",
-            model: DEFAULT_MODEL_BY_PROVIDER.codex,
+            provider: DEFAULT_PROVIDER_KIND,
+            model: DEFAULT_MODEL_BY_PROVIDER[DEFAULT_PROVIDER_KIND],
           },
           createdAt: new Date().toISOString(),
         });

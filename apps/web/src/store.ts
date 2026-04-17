@@ -1,5 +1,6 @@
-import type {
-  EnvironmentId,
+import {
+  DEFAULT_PROVIDER_KIND,
+  type EnvironmentId,
   MessageId,
   OrchestrationCheckpointSummary,
   OrchestrationEvent,
@@ -129,7 +130,7 @@ function arraysEqual<T>(left: readonly T[], right: readonly T[]): boolean {
   return left.length === right.length && left.every((value, index) => value === right[index]);
 }
 
-function normalizeModelSelection<T extends { provider: "codex" | "claudeAgent"; model: string }>(
+function normalizeModelSelection<T extends { provider: ProviderKind; model: string }>(
   selection: T,
 ): T {
   return {
@@ -1001,10 +1002,10 @@ function toLegacySessionStatus(
 }
 
 function toLegacyProvider(providerName: string | null): ProviderKind {
-  if (providerName === "codex" || providerName === "claudeAgent") {
+  if (providerName === "codex" || providerName === "claudeAgent" || providerName === "kiro") {
     return providerName;
   }
-  return "codex";
+  return DEFAULT_PROVIDER_KIND;
 }
 
 function attachmentPreviewRoutePath(attachmentId: string): string {

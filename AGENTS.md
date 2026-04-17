@@ -7,7 +7,7 @@
 
 ## Project Snapshot
 
-T3 Code is a minimal web GUI for using coding agents like Codex and Claude.
+T3 Code is a minimal web GUI for using coding agents like Codex, Claude, and Kiro.
 
 This repository is a VERY EARLY WIP. Proposing sweeping changes that improve long-term maintainability is encouraged.
 
@@ -25,29 +25,33 @@ Long term maintainability is a core priority. If you add new functionality, firs
 
 ## Package Roles
 
-- `apps/server`: Node.js WebSocket server. Wraps Codex app-server (JSON-RPC over stdio), serves the React web app, and manages provider sessions.
+- `apps/server`: Node.js WebSocket server. Wraps provider CLIs (JSON-RPC over stdio), serves the React web app, and manages provider sessions.
 - `apps/web`: React/Vite UI. Owns session UX, conversation/event rendering, and client-side state. Connects to the server via WebSocket.
 - `packages/contracts`: Shared effect/Schema schemas and TypeScript contracts for provider events, WebSocket protocol, and model/session types. Keep this package schema-only — no runtime logic.
 - `packages/shared`: Shared runtime utilities consumed by both server and web. Uses explicit subpath exports (e.g. `@t3tools/shared/git`) — no barrel index.
 
-## Codex App Server (Important)
+## Provider Architecture
 
-T3 Code is currently Codex-first. The server starts `codex app-server` (JSON-RPC over stdio) per provider session, then streams structured events to the browser through WebSocket push messages.
+T3 Code is Kiro-first (default provider). The server supports three providers: Kiro, Codex, and Claude. Each provider has its own adapter layer.
 
-How we use it in this codebase:
+### Kiro (default)
+
+The Kiro adapter communicates with `kiro-cli acp` (Agent Client Protocol over JSON-RPC/stdio). Key files:
+
+- `apps/server/src/provider/Layers/KiroAdapter.ts` — ACP process lifecycle, session management, turn dispatch.
+- `apps/server/src/provider/Layers/KiroProvider.ts` — Provider status detection, dynamic model fetching via `kiro-cli chat --list-models`.
+
+The adapter spawns `kiro-cli acp --model <model>` per session. Models are fetched dynamically at startup. The `session/prompt` RPC has no timeout (long-running tasks); process exit rejects all pending requests as a safety net.
+
+### Codex
 
 - Session startup/resume and turn lifecycle are brokered in `apps/server/src/codexAppServerManager.ts`.
-- Provider dispatch and thread event logging are coordinated in `apps/server/src/providerManager.ts`.
-- WebSocket server routes NativeApi methods in `apps/server/src/wsServer.ts`.
-- Web app consumes orchestration domain events via WebSocket push on channel `orchestration.domainEvent` (provider runtime activity is projected into orchestration events server-side).
+- The Codex adapter uses `codex app-server` (JSON-RPC over stdio) with fire-and-forget turn RPCs and streaming event notifications.
 
-Docs:
+### Claude
 
-- Codex App Server docs: https://developers.openai.com/codex/sdk/#app-server
+- The Claude adapter wraps `claude` CLI with its own JSON-RPC protocol.
 
-## Reference Repos
+### Adding a new provider
 
-- Open-source Codex repo: https://github.com/openai/codex
-- Codex-Monitor (Tauri, feature-complete, strong reference implementation): https://github.com/Dimillian/CodexMonitor
-
-Use these as implementation references when designing protocol handling, UX flows, and operational safeguards.
+When adding provider support, ensure `"kiro"` (or the new provider) is included in all enumeration points. Search for `"codex"` and `"claudeAgent"` patterns — anywhere these are listed, the new provider must also appear. Key locations: `ProviderKind` schema, `normalizeProviderKind`, provider iteration loops, default fallbacks, and `decodeProviderKind`.

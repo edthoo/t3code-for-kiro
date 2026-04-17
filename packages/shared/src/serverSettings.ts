@@ -1,4 +1,4 @@
-import { ServerSettings, type ServerSettingsPatch } from "@t3tools/contracts";
+import { type ModelSelection, ServerSettings, type ServerSettingsPatch } from "@t3tools/contracts";
 import { Schema } from "effect";
 import { deepMerge } from "./Struct";
 import { fromLenientJson } from "./schemaJson";
@@ -67,6 +67,6 @@ export function applyServerSettingsPatch(
       provider: selectionPatch.provider ?? current.textGenerationModelSelection.provider,
       model: selectionPatch.model ?? current.textGenerationModelSelection.model,
       ...(selectionPatch.options ? { options: selectionPatch.options } : {}),
-    },
+    } as ModelSelection,
   };
 }

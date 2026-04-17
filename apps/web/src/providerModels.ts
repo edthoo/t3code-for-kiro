@@ -1,5 +1,6 @@
 import {
   DEFAULT_MODEL_BY_PROVIDER,
+  DEFAULT_PROVIDER_KIND,
   type ModelCapabilities,
   type ProviderKind,
   type ServerProvider,
@@ -40,7 +41,7 @@ export function resolveSelectableProvider(
   providers: ReadonlyArray<ServerProvider>,
   provider: ProviderKind | null | undefined,
 ): ProviderKind {
-  const requested = provider ?? "codex";
+  const requested = provider ?? DEFAULT_PROVIDER_KIND;
   if (isProviderEnabled(providers, requested)) {
     return requested;
   }

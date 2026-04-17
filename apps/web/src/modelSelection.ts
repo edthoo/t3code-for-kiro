@@ -45,6 +45,13 @@ const PROVIDER_CUSTOM_MODEL_CONFIG: Record<ProviderKind, ProviderCustomModelConf
     placeholder: "your-claude-model-slug",
     example: "claude-sonnet-5-0",
   },
+  kiro: {
+    provider: "kiro",
+    title: "Kiro",
+    description: "Save additional Kiro model slugs for the picker.",
+    placeholder: "your-kiro-model-slug",
+    example: "kiro-custom-model",
+  },
 };
 
 export const MODEL_PROVIDER_SETTINGS = Object.values(PROVIDER_CUSTOM_MODEL_CONFIG);
@@ -52,7 +59,7 @@ export const MODEL_PROVIDER_SETTINGS = Object.values(PROVIDER_CUSTOM_MODEL_CONFI
 export function normalizeCustomModelSlugs(
   models: Iterable<string | null | undefined>,
   builtInModelSlugs: ReadonlySet<string>,
-  provider: ProviderKind = "codex",
+  provider: ProviderKind = "kiro",
 ): string[] {
   const normalizedModels: string[] = [];
   const seen = new Set<string>();
@@ -165,6 +172,12 @@ export function getCustomModelOptionsByProvider(
       "claudeAgent",
       selectedProvider === "claudeAgent" ? selectedModel : undefined,
     ),
+    kiro: getAppModelOptions(
+      settings,
+      providers,
+      "kiro",
+      selectedProvider === "kiro" ? selectedModel : undefined,
+    ),
   };
 }
 
@@ -173,8 +186,8 @@ export function resolveAppModelSelectionState(
   providers: ReadonlyArray<ServerProvider>,
 ): ModelSelection {
   const selection = settings.textGenerationModelSelection ?? {
-    provider: "codex" as const,
-    model: DEFAULT_GIT_TEXT_GENERATION_MODEL_BY_PROVIDER.codex,
+    provider: "kiro" as const,
+    model: DEFAULT_GIT_TEXT_GENERATION_MODEL_BY_PROVIDER.kiro,
   };
   const provider = resolveSelectableProvider(providers, selection.provider);
 
@@ -196,5 +209,5 @@ export function resolveAppModelSelectionState(
     provider,
     model,
     ...(modelOptionsForDispatch ? { options: modelOptionsForDispatch } : {}),
-  };
+  } as ModelSelection;
 }

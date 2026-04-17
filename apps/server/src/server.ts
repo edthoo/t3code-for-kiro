@@ -21,6 +21,7 @@ import { ProviderSessionDirectoryLive } from "./provider/Layers/ProviderSessionD
 import { ProviderSessionRuntimeRepositoryLive } from "./persistence/Layers/ProviderSessionRuntime";
 import { makeCodexAdapterLive } from "./provider/Layers/CodexAdapter";
 import { makeClaudeAdapterLive } from "./provider/Layers/ClaudeAdapter";
+import { KiroAdapterLive } from "./provider/Layers/KiroAdapter";
 import { ProviderAdapterRegistryLive } from "./provider/Layers/ProviderAdapterRegistry";
 import { makeProviderServiceLive } from "./provider/Layers/ProviderService";
 import { ProviderSessionReaperLive } from "./provider/Layers/ProviderSessionReaper";
@@ -157,6 +158,7 @@ const ProviderLayerLive = Layer.unwrap(
     const adapterRegistryLayer = ProviderAdapterRegistryLive.pipe(
       Layer.provide(codexAdapterLayer),
       Layer.provide(claudeAdapterLayer),
+      Layer.provide(KiroAdapterLive),
       Layer.provideMerge(ProviderSessionDirectoryLayerLive),
     );
     return makeProviderServiceLive(

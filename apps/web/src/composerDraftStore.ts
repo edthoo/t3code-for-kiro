@@ -2,6 +2,7 @@ import {
   ClaudeAgentEffort,
   CodexReasoningEffort,
   DEFAULT_MODEL_BY_PROVIDER,
+  DEFAULT_PROVIDER_KIND,
   type EnvironmentId,
   ModelSelection,
   ProjectId,
@@ -527,7 +528,7 @@ function shouldRemoveDraft(draft: ComposerThreadDraftState): boolean {
 }
 
 function normalizeProviderKind(value: unknown): ProviderKind | null {
-  return value === "codex" || value === "claudeAgent" ? value : null;
+  return value === "codex" || value === "claudeAgent" || value === "kiro" ? value : null;
 }
 
 function normalizeProviderModelOptions(
@@ -637,12 +638,17 @@ function normalizeModelSelection(
     provider,
     provider === "codex" ? legacy?.legacyCodex : undefined,
   );
-  const options = provider === "codex" ? modelOptions?.codex : modelOptions?.claudeAgent;
+  const options =
+    provider === "codex"
+      ? modelOptions?.codex
+      : provider === "claudeAgent"
+        ? modelOptions?.claudeAgent
+        : modelOptions?.kiro;
   return {
     provider,
     model,
     ...(options ? { options } : {}),
-  };
+  } as ModelSelection;
 }
 
 // ── Legacy sync helpers (used only during migration from v2 storage) ──
@@ -659,7 +665,7 @@ function legacySyncModelSelectionOptions(
     provider: modelSelection.provider,
     model: modelSelection.model,
     ...(options ? { options } : {}),
-  };
+  } as ModelSelection;
 }
 
 function legacyMergeModelSelectionIntoProviderModelOptions(
@@ -703,7 +709,7 @@ function legacyToModelSelectionByProvider(
   const result: Partial<Record<ProviderKind, ModelSelection>> = {};
   // Add entries from the options bag (for non-active providers)
   if (modelOptions) {
-    for (const provider of ["codex", "claudeAgent"] as const) {
+    for (const provider of ["codex", "claudeAgent", "kiro"] as const) {
       const options = modelOptions[provider];
       if (options && Object.keys(options).length > 0) {
         result[provider] = {
@@ -1428,7 +1434,7 @@ function migratePersistedComposerDraftStoreState(
   // Migrate sticky state from v2 (dual) to v3 (consolidated)
   const stickyModelOptions = normalizeProviderModelOptions(candidate.stickyModelOptions) ?? {};
   const normalizedStickyModelSelection = normalizeModelSelection(candidate.stickyModelSelection, {
-    provider: candidate.stickyProvider ?? "codex",
+    provider: candidate.stickyProvider ?? DEFAULT_PROVIDER_KIND,
     model: candidate.stickyModel,
     modelOptions: stickyModelOptions,
   });
@@ -2209,7 +2215,7 @@ const composerDraftStore = create<ComposerDraftStoreState>()(
                   provider: normalized.provider,
                   model: normalized.model,
                   ...(current?.options ? { options: current.options } : {}),
-                };
+                } as ModelSelection;
               }
             }
             const nextActiveProvider = normalized?.provider ?? base.activeProvider;
@@ -2246,7 +2252,7 @@ const composerDraftStore = create<ComposerDraftStoreState>()(
             }
             const base = existing ?? createEmptyThreadDraft();
             const nextMap = { ...base.modelSelectionByProvider };
-            for (const provider of ["codex", "claudeAgent"] as const) {
+            for (const provider of ["codex", "claudeAgent", "kiro"] as const) {
               // Only touch providers explicitly present in the input
               if (!normalizedOpts || !(provider in normalizedOpts)) continue;
               const opts = normalizedOpts[provider];
@@ -2307,7 +2313,7 @@ const composerDraftStore = create<ComposerDraftStoreState>()(
                 provider: normalizedProvider,
                 model: currentForProvider?.model ?? DEFAULT_MODEL_BY_PROVIDER[normalizedProvider],
                 options: providerOpts,
-              };
+              } as ModelSelection;
             } else if (currentForProvider?.options) {
               const { options: _, ...rest } = currentForProvider;
               nextMap[normalizedProvider] = rest as ModelSelection;
@@ -2330,7 +2336,7 @@ const composerDraftStore = create<ComposerDraftStoreState>()(
                   ...stickyBase,
                   provider: normalizedProvider,
                   options: providerOpts,
-                };
+                } as ModelSelection;
               } else if (stickyBase.options) {
                 const { options: _, ...rest } = stickyBase;
                 nextStickyMap[normalizedProvider] = rest as ModelSelection;
